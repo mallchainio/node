@@ -1,0 +1,27 @@
+{
+	"name": "ckplayer",
+	"version": "3.1.2",
+	"description": "一款用于在网页端播放视频的软件",
+	"keywords": [
+		"ckplayer",
+		"mp4",
+		"flv",
+		"m3u8",
+		"ts",
+		"web",
+		"video"
+	],
+	"homepage": "https://github.com/geekmakersun/ckplayer#readme",
+	"bugs": {
+		"url": "https://github.com/geekmakersun/ckplayer/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/geekmakersun/ckplayer.git"
+	},
+	"license": "MIT",
+	"author": "niandeng",
+	"scripts": {
+		"publish": "npm publish"
+	}
+}
