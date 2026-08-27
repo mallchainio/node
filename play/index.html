@@ -1,181 +1,459 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CKPlayer M3U8 播放器</title>
-    <link rel="stylesheet" type="text/css" href="css/ckplayer.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #0a0a0a;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            width: 100%;
-            max-width: 960px;
-        }
-        .video-box {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-        }
-        .input-box {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .input-box input {
-            flex: 1;
-            min-width: 200px;
-            padding: 12px 16px;
-            border: 1px solid #333;
-            border-radius: 6px;
-            background: #1a1a1a;
-            color: #fff;
-            font-size: 14px;
-            outline: none;
-        }
-        .input-box input:focus {
-            border-color: #e74c3c;
-        }
-        .input-box button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            background: #e74c3c;
-            color: #fff;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .input-box button:hover {
-            background: #c0392b;
-        }
-        .tips {
-            margin-top: 15px;
-            color: #888;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-        .tips code {
-            background: #222;
-            padding: 2px 6px;
-            border-radius: 3px;
-            color: #e74c3c;
-        }
-        .empty-state {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            font-size: 16px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+<title>影视播放器</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: #080808;
+    color: #fff;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+}
+
+.page {
+    width: 100%;
+    min-height: 100vh;
+    background: #080808;
+}
+
+/* 顶部 UI */
+.topbar {
+    height: 58px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    background: #111;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.back {
+    width: 42px;
+    height: 42px;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 27px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.title {
+    flex: 1;
+    min-width: 0;
+    padding: 0 10px;
+}
+
+.title-main {
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.title-sub {
+    margin-top: 3px;
+    color: #888;
+    font-size: 11px;
+}
+
+/* 线路按钮 */
+.line-btn {
+    height: 32px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 16px;
+    background: #252525;
+    color: #ddd;
+    font-size: 12px;
+}
+
+/* 播放器 */
+.player-box {
+    width: 100%;
+    background: #000;
+    aspect-ratio: 16 / 9;
+    position: relative;
+}
+
+#video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #000;
+}
+
+/* 播放器下面 */
+.info {
+    padding: 16px;
+}
+
+.info-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.info-desc {
+    margin-top: 7px;
+    color: #888;
+    font-size: 13px;
+}
+
+/* 状态 */
+.status {
+    margin-top: 14px;
+    padding: 11px 13px;
+    border-radius: 8px;
+    background: #151515;
+    color: #999;
+    font-size: 12px;
+}
+
+.status.ok {
+    color: #aaa;
+}
+
+/* PC */
+@media (min-width: 768px) {
+
+    .page {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .topbar {
+        height: 64px;
+    }
+
+    .player-box {
+        max-height: 620px;
+    }
+
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="video-box" id="video"></div>
 
-        <div class="input-box">
-            <input type="text" id="urlInput" placeholder="输入 M3U8 视频地址...">
-            <button onclick="play()">播放</button>
+<div class="page">
+
+    <!-- 顶部 UI -->
+    <div class="topbar">
+
+        <button class="back" onclick="history.back()">
+            ‹
+        </button>
+
+        <div class="title">
+
+            <div class="title-main" id="title">
+                正在播放
+            </div>
+
+            <div class="title-sub">
+                HLS / MP4 播放器
+            </div>
+
         </div>
 
-        <div class="tips">
-            <p>📌 支持通过 URL 参数传入视频地址：<code>index.html?url=https://xxx.m3u8</code></p>
-            <p>📌 支持格式：m3u8 (HLS)、mp4、flv、mpegts 等</p>
-        </div>
+        <button class="line-btn">
+            线路 1
+        </button>
+
     </div>
 
-    <script type="text/javascript" src="hls/hls.min.js"></script>
-    <script type="text/javascript" src="js/ckplayer.min.js" charset="UTF-8"></script>
-    <script>
-        var player = null;
 
-        function getQueryParam(name) {
-            var urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
+    <!-- 播放器 -->
+    <div class="player-box">
+
+        <video
+            id="video"
+            controls
+            playsinline
+            webkit-playsinline
+            x5-playsinline
+            x5-video-player-type="h5"
+            x5-video-player-fullscreen="true">
+        </video>
+
+    </div>
+
+
+    <!-- 信息 -->
+    <div class="info">
+
+        <div class="info-title">
+            正在播放
+        </div>
+
+        <div class="info-desc">
+            支持 M3U8、MP4、WebM、OGG
+        </div>
+
+        <div class="status" id="status">
+            正在加载视频...
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+(function () {
+
+    var video = document.getElementById('video');
+    var status = document.getElementById('status');
+    var title = document.getElementById('title');
+
+    var params = new URLSearchParams(window.location.search);
+
+    var url = params.get('url');
+
+    if (!url) {
+
+        status.innerText = '没有找到视频地址';
+        return;
+
+    }
+
+
+    /*
+     * URL 参数可以顺便传标题
+     *
+     * play.html?url=xxx&title=电影名称
+     */
+
+    var videoTitle = params.get('title');
+
+    if (videoTitle) {
+
+        title.innerText = videoTitle;
+
+        document.title = videoTitle;
+
+    }
+
+
+    /*
+     * URL 解码
+     */
+
+    try {
+
+        url = decodeURIComponent(url);
+
+    } catch (e) {}
+
+
+    var cleanUrl = url
+        .split('?')[0]
+        .toLowerCase();
+
+
+    /*
+     * M3U8
+     */
+
+    if (
+        cleanUrl.indexOf('.m3u8') !== -1 ||
+        cleanUrl.indexOf('.m3u') !== -1
+    ) {
+
+        if (
+            typeof Hls !== 'undefined' &&
+            Hls.isSupported()
+        ) {
+
+            var hls = new Hls({
+
+                enableWorker: true,
+
+                lowLatencyMode: false
+
+            });
+
+            hls.loadSource(url);
+
+            hls.attachMedia(video);
+
+
+            hls.on(
+                Hls.Events.MANIFEST_PARSED,
+                function () {
+
+                    status.innerText = '视频加载完成';
+
+                    status.classList.add('ok');
+
+                    video.play().catch(function () {});
+
+                }
+            );
+
+
+            hls.on(
+                Hls.Events.ERROR,
+                function (event, data) {
+
+                    console.log(
+                        'HLS错误:',
+                        data
+                    );
+
+                    if (data.fatal) {
+
+                        status.innerText =
+                            '视频加载失败，请更换线路或重试';
+
+                    }
+
+                }
+            );
+
         }
 
-        function playVideo(url) {
-            if (!url) return;
+        /*
+         * Safari 原生 HLS
+         */
 
-            // Update input value
-            document.getElementById('urlInput').value = url;
+        else if (
+            video.canPlayType(
+                'application/vnd.apple.mpegurl'
+            )
+        ) {
 
-            // Destroy existing player
-            if (player) {
-                try {
-                    player.remove();
-                } catch(e) {}
-                player = null;
-            }
+            video.src = url;
 
-            // Clear container
-            var container = document.getElementById('video');
-            container.innerHTML = '';
+            video.addEventListener(
+                'loadedmetadata',
+                function () {
 
-            // Detect video type
-            var isM3u8 = /\.m3u8(?:\?|$)/i.test(url);
-            var isFlv = /\.flv(?:\?|$)/i.test(url);
-            var isMpegts = /\.ts(?:\?|$)/i.test(url);
+                    status.innerText =
+                        '视频加载完成';
 
-            var videoObject = {
-                container: '#video',
-                variable: 'player',
-                autoplay: true,
-                live: false,
-                video: url
-            };
+                    video.play().catch(
+                        function () {}
+                    );
 
-            if (isM3u8) {
-                videoObject.plug = 'hls.js';
-            } else if (isFlv) {
-                videoObject.plug = 'flv.js';
-            } else if (isMpegts) {
-                videoObject.plug = 'mpegts.js';
-            }
+                }
+            );
 
-            player = new ckplayer(videoObject);
         }
 
-        function play() {
-            var url = document.getElementById('urlInput').value.trim();
-            if (url) {
-                // Update URL without reloading
-                var newUrl = window.location.pathname + '?url=' + encodeURIComponent(url);
-                window.history.replaceState({}, '', newUrl);
-                playVideo(url);
-            }
+        else {
+
+            status.innerText =
+                '当前浏览器不支持 M3U8';
+
         }
 
-        // Auto-play from URL parameter
-        var urlParam = getQueryParam('url');
-        if (urlParam) {
-            playVideo(urlParam);
-        } else {
-            document.getElementById('video').innerHTML = 
-                '<div class="empty-state">请输入视频地址或从 URL 参数传入</div>';
-        }
+    }
 
-        // Enter key support
-        document.getElementById('urlInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') play();
-        });
-    </script>
+
+    /*
+     * MP4
+     */
+
+    else if (
+        cleanUrl.indexOf('.mp4') !== -1
+    ) {
+
+        video.src = url;
+
+        status.innerText =
+            'MP4 视频';
+
+        video.play().catch(
+            function () {}
+        );
+
+    }
+
+
+    /*
+     * WebM
+     */
+
+    else if (
+        cleanUrl.indexOf('.webm') !== -1
+    ) {
+
+        video.src = url;
+
+        status.innerText =
+            'WebM 视频';
+
+        video.play().catch(
+            function () {}
+        );
+
+    }
+
+
+    /*
+     * OGG
+     */
+
+    else if (
+        cleanUrl.indexOf('.ogg') !== -1 ||
+        cleanUrl.indexOf('.ogv') !== -1
+    ) {
+
+        video.src = url;
+
+        status.innerText =
+            'OGG 视频';
+
+        video.play().catch(
+            function () {}
+        );
+
+    }
+
+
+    /*
+     * 未知格式
+     */
+
+    else {
+
+        video.src = url;
+
+        status.innerText =
+            '正在尝试播放';
+
+        video.play().catch(
+            function () {}
+        );
+
+    }
+
+})();
+</script>
+
 </body>
 </html>
