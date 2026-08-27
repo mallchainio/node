@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 
-<title>影视播放器</title>
+<title>视频播放器</title>
 
 <style>
 * {
@@ -16,8 +16,6 @@ html,
 body {
     margin: 0;
     padding: 0;
-    width: 100%;
-    min-height: 100%;
     background: #080808;
     color: #fff;
     font-family:
@@ -29,125 +27,166 @@ body {
         sans-serif;
 }
 
-.page {
-    width: 100%;
+body {
     min-height: 100vh;
-    background: #080808;
 }
 
-/* 顶部 UI */
+.page {
+    min-height: 100vh;
+
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            #242424 0,
+            #101010 35%,
+            #080808 70%
+        );
+}
+
+
+/* 顶部 */
+
 .topbar {
     height: 58px;
+
+    padding: 0 14px;
+
     display: flex;
     align-items: center;
-    padding: 0 14px;
-    background: #111;
-    border-bottom: 1px solid rgba(255,255,255,.06);
+
+    background: rgba(10,10,10,.9);
+
+    border-bottom:
+        1px solid rgba(255,255,255,.06);
+
+    backdrop-filter: blur(15px);
 }
 
 .back {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
+
     border: 0;
-    background: transparent;
+    border-radius: 50%;
+
+    background: rgba(255,255,255,.08);
+
     color: #fff;
-    font-size: 27px;
+
+    font-size: 28px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     cursor: pointer;
 }
 
 .title {
     flex: 1;
-    min-width: 0;
-    padding: 0 10px;
-}
 
-.title-main {
+    margin-left: 11px;
+
     font-size: 16px;
+
     font-weight: 600;
+
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
-.title-sub {
-    margin-top: 3px;
-    color: #888;
-    font-size: 11px;
-}
-
-/* 线路按钮 */
-.line-btn {
-    height: 32px;
-    padding: 0 12px;
-    border: 0;
-    border-radius: 16px;
-    background: #252525;
-    color: #ddd;
-    font-size: 12px;
-}
 
 /* 播放器 */
-.player-box {
+
+.player-wrap {
     width: 100%;
+
     background: #000;
+}
+
+.player {
+    width: 100%;
+
     aspect-ratio: 16 / 9;
-    position: relative;
+
+    background: #000;
 }
 
 #video {
     width: 100%;
     height: 100%;
+
     display: block;
+
     background: #000;
 }
 
-/* 播放器下面 */
-.info {
-    padding: 16px;
+
+/* 内容 */
+
+.content {
+    padding: 20px 16px 40px;
+
+    max-width: 900px;
+
+    margin: 0 auto;
 }
 
-.info-title {
-    font-size: 18px;
-    font-weight: 600;
+.video-title {
+    font-size: 21px;
+
+    font-weight: 700;
+
+    line-height: 1.4;
 }
 
-.info-desc {
-    margin-top: 7px;
+.meta {
+    margin-top: 8px;
+
     color: #888;
-    font-size: 13px;
-}
 
-/* 状态 */
-.status {
-    margin-top: 14px;
-    padding: 11px 13px;
-    border-radius: 8px;
-    background: #151515;
-    color: #999;
     font-size: 12px;
 }
 
-.status.ok {
-    color: #aaa;
+.info {
+    margin-top: 18px;
+
+    padding: 14px;
+
+    border-radius: 9px;
+
+    background: rgba(255,255,255,.045);
+
+    border:
+        1px solid rgba(255,255,255,.05);
+
+    color: #999;
+
+    font-size: 12px;
+
+    line-height: 1.6;
 }
 
+
 /* PC */
+
 @media (min-width: 768px) {
 
-    .page {
-        max-width: 1100px;
-        margin: 0 auto;
-    }
-
     .topbar {
-        height: 64px;
+        padding: 0 25px;
     }
 
-    .player-box {
-        max-height: 620px;
+    .player {
+        max-width: 1100px;
+        margin: auto;
+    }
+
+    .content {
+        padding-left: 25px;
+        padding-right: 25px;
     }
 
 }
@@ -158,61 +197,73 @@ body {
 
 <div class="page">
 
-    <!-- 顶部 UI -->
+
+    <!-- 顶部 -->
+
     <div class="topbar">
 
-        <button class="back" onclick="history.back()">
+        <button
+            class="back"
+            onclick="history.back()">
+
             ‹
+
         </button>
 
-        <div class="title">
+        <div
+            class="title"
+            id="title">
 
-            <div class="title-main" id="title">
-                正在播放
-            </div>
-
-            <div class="title-sub">
-                HLS / MP4 播放器
-            </div>
+            正在播放
 
         </div>
-
-        <button class="line-btn">
-            线路 1
-        </button>
 
     </div>
 
 
     <!-- 播放器 -->
-    <div class="player-box">
 
-        <video
-            id="video"
-            controls
-            playsinline
-            webkit-playsinline
-            x5-playsinline
-            x5-video-player-type="h5"
-            x5-video-player-fullscreen="true">
-        </video>
+    <div class="player-wrap">
+
+        <div class="player">
+
+            <video
+                id="video"
+                controls
+                playsinline
+                webkit-playsinline
+                x5-playsinline
+                x5-video-player-type="h5"
+                x5-video-player-fullscreen="true">
+            </video>
+
+        </div>
 
     </div>
 
 
     <!-- 信息 -->
-    <div class="info">
 
-        <div class="info-title">
+    <div class="content">
+
+        <div
+            class="video-title"
+            id="videoTitle">
+
             正在播放
+
         </div>
 
-        <div class="info-desc">
-            支持 M3U8、MP4、WebM、OGG
+        <div class="meta">
+            高清在线播放
         </div>
 
-        <div class="status" id="status">
-            正在加载视频...
+        <div
+            class="info"
+            id="status">
+
+            正在连接视频...
+
         </div>
 
     </div>
@@ -223,228 +274,195 @@ body {
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
+
 (function () {
 
-    var video = document.getElementById('video');
-    var status = document.getElementById('status');
-    var title = document.getElementById('title');
+    var video =
+        document.getElementById('video');
 
-    var params = new URLSearchParams(window.location.search);
+    var status =
+        document.getElementById('status');
 
-    var url = params.get('url');
+    var title =
+        document.getElementById('title');
+
+    var videoTitle =
+        document.getElementById('videoTitle');
+
+
+    /*
+     * 获取 URL 参数
+     */
+
+    var params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    var url =
+        params.get('url');
+
+    var name =
+        params.get('title');
+
 
     if (!url) {
 
-        status.innerText = '没有找到视频地址';
+        status.innerText =
+            '没有找到视频地址';
+
         return;
 
     }
 
 
     /*
-     * URL 参数可以顺便传标题
-     *
-     * play.html?url=xxx&title=电影名称
+     * 标题
      */
 
-    var videoTitle = params.get('title');
+    if (name) {
 
-    if (videoTitle) {
+        title.innerText = name;
 
-        title.innerText = videoTitle;
+        videoTitle.innerText = name;
 
-        document.title = videoTitle;
+        document.title = name;
 
     }
 
 
     /*
-     * URL 解码
-     */
-
-    try {
-
-        url = decodeURIComponent(url);
-
-    } catch (e) {}
-
-
-    var cleanUrl = url
-        .split('?')[0]
-        .toLowerCase();
-
-
-    /*
-     * M3U8
+     * HLS
+     *
+     * 不判断 .m3u8
+     *
+     * gs.php?id=1
+     * 也可以直接进入这里
      */
 
     if (
-        cleanUrl.indexOf('.m3u8') !== -1 ||
-        cleanUrl.indexOf('.m3u') !== -1
+        typeof Hls !== 'undefined' &&
+        Hls.isSupported()
     ) {
 
-        if (
-            typeof Hls !== 'undefined' &&
-            Hls.isSupported()
-        ) {
-
-            var hls = new Hls({
+        var hls =
+            new Hls({
 
                 enableWorker: true,
 
-                lowLatencyMode: false
+                lowLatencyMode: false,
+
+                backBufferLength: 30
 
             });
 
-            hls.loadSource(url);
 
-            hls.attachMedia(video);
-
-
-            hls.on(
-                Hls.Events.MANIFEST_PARSED,
-                function () {
-
-                    status.innerText = '视频加载完成';
-
-                    status.classList.add('ok');
-
-                    video.play().catch(function () {});
-
-                }
-            );
+        hls.attachMedia(video);
 
 
-            hls.on(
-                Hls.Events.ERROR,
-                function (event, data) {
+        hls.on(
+            Hls.Events.MEDIA_ATTACHED,
+            function () {
 
-                    console.log(
-                        'HLS错误:',
-                        data
-                    );
+                hls.loadSource(url);
 
-                    if (data.fatal) {
+            }
+        );
 
-                        status.innerText =
-                            '视频加载失败，请更换线路或重试';
 
-                    }
+        hls.on(
+            Hls.Events.MANIFEST_PARSED,
+            function () {
 
-                }
-            );
+                status.innerText =
+                    '视频已准备好';
 
-        }
+                video.play().catch(
+                    function () {}
+                );
 
-        /*
-         * Safari 原生 HLS
-         */
+            }
+        );
 
-        else if (
-            video.canPlayType(
-                'application/vnd.apple.mpegurl'
-            )
-        ) {
 
-            video.src = url;
+        hls.on(
+            Hls.Events.ERROR,
+            function (
+                event,
+                data
+            ) {
 
-            video.addEventListener(
-                'loadedmetadata',
-                function () {
+                console.log(
+                    'HLS错误:',
+                    data
+                );
 
-                    status.innerText =
-                        '视频加载完成';
+
+                if (data.fatal) {
+
+                    /*
+                     * HLS失败
+                     *
+                     * 再尝试浏览器原生播放
+                     */
+
+                    hls.destroy();
+
+                    video.src = url;
+
+                    video.load();
 
                     video.play().catch(
                         function () {}
                     );
 
                 }
-            );
 
-        }
-
-        else {
-
-            status.innerText =
-                '当前浏览器不支持 M3U8';
-
-        }
-
-    }
-
-
-    /*
-     * MP4
-     */
-
-    else if (
-        cleanUrl.indexOf('.mp4') !== -1
-    ) {
-
-        video.src = url;
-
-        status.innerText =
-            'MP4 视频';
-
-        video.play().catch(
-            function () {}
+            }
         );
 
     }
 
 
     /*
-     * WebM
+     * Safari / iOS
      */
 
     else if (
-        cleanUrl.indexOf('.webm') !== -1
+        video.canPlayType(
+            'application/vnd.apple.mpegurl'
+        )
     ) {
 
         video.src = url;
 
-        status.innerText =
-            'WebM 视频';
 
-        video.play().catch(
-            function () {}
+        video.addEventListener(
+            'loadedmetadata',
+            function () {
+
+                status.innerText =
+                    '视频已准备好';
+
+                video.play().catch(
+                    function () {}
+                );
+
+            }
         );
 
     }
 
 
     /*
-     * OGG
-     */
-
-    else if (
-        cleanUrl.indexOf('.ogg') !== -1 ||
-        cleanUrl.indexOf('.ogv') !== -1
-    ) {
-
-        video.src = url;
-
-        status.innerText =
-            'OGG 视频';
-
-        video.play().catch(
-            function () {}
-        );
-
-    }
-
-
-    /*
-     * 未知格式
+     * 其他浏览器
      */
 
     else {
 
         video.src = url;
 
-        status.innerText =
-            '正在尝试播放';
+        video.load();
 
         video.play().catch(
             function () {}
@@ -452,7 +470,28 @@ body {
 
     }
 
+
+    /*
+     * 视频错误
+     */
+
+    video.addEventListener(
+        'error',
+        function () {
+
+            status.innerText =
+                '视频加载失败';
+
+            console.log(
+                'Video Error:',
+                video.error
+            );
+
+        }
+    );
+
 })();
+
 </script>
 
 </body>
