@@ -151,10 +151,80 @@ body {
     font-size: 12px;
 }
 
-.info {
+
+/* URL输入 */
+
+.url-box {
     margin-top: 18px;
 
-    padding: 14px;
+    display: flex;
+
+    gap: 8px;
+}
+
+.url-input {
+    flex: 1;
+
+    min-width: 0;
+
+    height: 44px;
+
+    padding: 0 13px;
+
+    border: 1px solid rgba(255,255,255,.1);
+
+    border-radius: 8px;
+
+    outline: none;
+
+    background: #151515;
+
+    color: #fff;
+
+    font-size: 13px;
+}
+
+.url-input::placeholder {
+    color: #666;
+}
+
+.url-input:focus {
+    border-color: rgba(255,255,255,.3);
+}
+
+.play-btn {
+    flex: 0 0 auto;
+
+    height: 44px;
+
+    padding: 0 20px;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    background: #fff;
+
+    color: #000;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.play-btn:active {
+    transform: scale(.97);
+}
+
+
+/* 状态 */
+
+.info {
+    margin-top: 14px;
+
+    padding: 13px 14px;
 
     border-radius: 9px;
 
@@ -163,7 +233,7 @@ body {
     border:
         1px solid rgba(255,255,255,.05);
 
-    color: #999;
+    color: #888;
 
     font-size: 12px;
 
@@ -181,6 +251,7 @@ body {
 
     .player {
         max-width: 1100px;
+
         margin: auto;
     }
 
@@ -196,7 +267,6 @@ body {
 <body>
 
 <div class="page">
-
 
     <!-- 顶部 -->
 
@@ -214,7 +284,7 @@ body {
             class="title"
             id="title">
 
-            正在播放
+            视频播放器
 
         </div>
 
@@ -242,7 +312,7 @@ body {
     </div>
 
 
-    <!-- 信息 -->
+    <!-- 内容 -->
 
     <div class="content">
 
@@ -250,19 +320,44 @@ body {
             class="video-title"
             id="videoTitle">
 
-            正在播放
+            在线视频
 
         </div>
 
         <div class="meta">
-            高清在线播放
+            支持 M3U8 / MP4 / WebM 等格式
         </div>
+
+
+        <!-- URL -->
+
+        <div class="url-box">
+
+            <input
+                type="text"
+                id="urlInput"
+                class="url-input"
+                placeholder="请输入视频 URL"
+                autocomplete="off">
+
+            <button
+                class="play-btn"
+                onclick="startPlay()">
+
+                ▶ 播放
+
+            </button>
+
+        </div>
+
+
+        <!-- 状态 -->
 
         <div
             class="info"
             id="status">
 
-            正在连接视频...
+            请输入视频地址后点击播放
 
         </div>
 
@@ -275,7 +370,14 @@ body {
 
 <script>
 
-(function () {
+var hls = null;
+
+
+/*
+ * 播放视频
+ */
+
+function playVideo(url) {
 
     var video =
         document.getElementById('video');
@@ -283,33 +385,11 @@ body {
     var status =
         document.getElementById('status');
 
-    var title =
-        document.getElementById('title');
-
-    var videoTitle =
-        document.getElementById('videoTitle');
-
-
-    /*
-     * 获取 URL 参数
-     */
-
-    var params =
-        new URLSearchParams(
-            window.location.search
-        );
-
-    var url =
-        params.get('url');
-
-    var name =
-        params.get('title');
-
 
     if (!url) {
 
         status.innerText =
-            '没有找到视频地址';
+            '请输入视频地址';
 
         return;
 
@@ -317,27 +397,43 @@ body {
 
 
     /*
-     * 标题
+     * 清理之前的 HLS
      */
 
-    if (name) {
+    if (hls) {
 
-        title.innerText = name;
+        try {
 
-        videoTitle.innerText = name;
+            hls.destroy();
 
-        document.title = name;
+        } catch (e) {}
+
+        hls = null;
 
     }
 
 
     /*
-     * HLS
+     * 清理旧视频
+     */
+
+    video.pause();
+
+    video.removeAttribute('src');
+
+    video.load();
+
+
+    status.innerText =
+        '正在连接视频...';
+
+
+    /*
+     * HLS.js
      *
      * 不判断 .m3u8
      *
-     * gs.php?id=1
-     * 也可以直接进入这里
+     * gs.php?id=1 也可以
      */
 
     if (
@@ -345,7 +441,7 @@ body {
         Hls.isSupported()
     ) {
 
-        var hls =
+        hls =
             new Hls({
 
                 enableWorker: true,
@@ -402,11 +498,17 @@ body {
 
                     /*
                      * HLS失败
-                     *
-                     * 再尝试浏览器原生播放
+                     * 尝试原生 video
                      */
 
-                    hls.destroy();
+                    try {
+
+                        hls.destroy();
+
+                    } catch (e) {}
+
+                    hls = null;
+
 
                     video.src = url;
 
@@ -425,7 +527,7 @@ body {
 
 
     /*
-     * Safari / iOS
+     * Safari / iOS 原生 HLS
      */
 
     else if (
@@ -436,10 +538,14 @@ body {
 
         video.src = url;
 
-
         video.addEventListener(
             'loadedmetadata',
-            function () {
+            function onLoaded() {
+
+                video.removeEventListener(
+                    'loadedmetadata',
+                    onLoaded
+                );
 
                 status.innerText =
                     '视频已准备好';
@@ -455,7 +561,7 @@ body {
 
 
     /*
-     * 其他浏览器
+     * 其他格式
      */
 
     else {
@@ -479,16 +585,113 @@ body {
         'error',
         function () {
 
-            status.innerText =
-                '视频加载失败';
+            if (video.error) {
 
-            console.log(
-                'Video Error:',
-                video.error
-            );
+                status.innerText =
+                    '视频加载失败，请检查 URL';
+
+            }
 
         }
     );
+
+}
+
+
+/*
+ * 点击播放
+ */
+
+function startPlay() {
+
+    var input =
+        document.getElementById('urlInput');
+
+    var url =
+        input.value.trim();
+
+    playVideo(url);
+
+}
+
+
+/*
+ * 回车播放
+ */
+
+document
+.getElementById('urlInput')
+.addEventListener(
+    'keydown',
+    function (e) {
+
+        if (e.key === 'Enter') {
+
+            startPlay();
+
+        }
+
+    }
+);
+
+
+/*
+ * 如果 URL 参数存在
+ *
+ * 自动播放
+ *
+ * play.html?url=xxx
+ */
+
+(function () {
+
+    var params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    var url =
+        params.get('url');
+
+    var name =
+        params.get('title');
+
+
+    if (url) {
+
+        var input =
+            document.getElementById(
+                'urlInput'
+            );
+
+        input.value = url;
+
+
+        if (name) {
+
+            try {
+
+                name =
+                    decodeURIComponent(name);
+
+            } catch (e) {}
+
+            document.getElementById(
+                'title'
+            ).innerText = name;
+
+            document.getElementById(
+                'videoTitle'
+            ).innerText = name;
+
+            document.title = name;
+
+        }
+
+
+        playVideo(url);
+
+    }
 
 })();
 
